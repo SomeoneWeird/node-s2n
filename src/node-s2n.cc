@@ -9,6 +9,13 @@ using namespace v8;
 
 void InitAll(Handle<Object> exports) {
   NanScope();
+
+  int s2n_init_err = s2n_init();
+
+  if(s2n_init_err == -1) {
+    return NanThrowError("S2N failed to init");
+  }
+
   S2NConfig::Init(exports);
   S2NConnection::Init(exports);
   exports->Set(NanNew("S2N_SSLv2"), NanNew(S2N_SSLv2));
