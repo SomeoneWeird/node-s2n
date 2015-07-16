@@ -9,6 +9,8 @@ class S2NConfig : public node::ObjectWrap {
  public:
   static void Init(v8::Handle<v8::Object> exports);
 
+  struct s2n_config *s2nconfig;
+
  private:
   explicit S2NConfig();
   ~S2NConfig();
@@ -19,8 +21,6 @@ class S2NConfig : public node::ObjectWrap {
   static NAN_METHOD(AddCertChainAndKey);
   static NAN_METHOD(AddDhParams);
   static v8::Persistent<v8::Function> constructor;
-
-  struct s2n_config *s2nconfig;
 
   const char *version;
 

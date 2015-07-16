@@ -1,10 +1,18 @@
 #include "node-s2nconnection.h"
+#include "node-s2nconfig.h"
+
+#include <node.h>
+#include <s2n.h>
 
 using namespace v8;
 
 Persistent<Function> S2NConnection::constructor;
 
-S2NConnection::S2NConnection() {
+S2NConnection::S2NConnection(s2n_mode mode) {
+  s2n_connection *s2nconnection = s2n_connection_new(mode);
+  if(!s2nconnection) {
+    NanThrowError("Error getting new S2N connection");
+  }
 }
 
 S2NConnection::~S2NConnection() {
@@ -18,6 +26,9 @@ void S2NConnection::Init(Handle<Object> exports) {
   tpl->SetClassName(NanNew("S2NConnection"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
+  NODE_SET_PROTOTYPE_METHOD(tpl, "setConfig", SetConfig);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "setServerName", SetServerName);
+
   NanAssignPersistent(constructor, tpl->GetFunction());
   exports->Set(NanNew("S2NConnection"), tpl->GetFunction());
 
@@ -26,8 +37,16 @@ void S2NConnection::Init(Handle<Object> exports) {
 NAN_METHOD(S2NConnection::New) {
   NanScope();
 
+  if(args.Length() < 1 || !args[0]->IsNumber()) {
+    NanThrowTypeError("Wrong arguments");
+    NanReturnUndefined();
+  }
+
+  s2n_mode mode = static_cast<s2n_mode>(args[0]->Int32Value());
+
   if (args.IsConstructCall()) {
-    S2NConnection* obj = new S2NConnection();
+    S2NConnection* obj = new S2NConnection(mode);
+    obj->mode = mode;
     obj->Wrap(args.This());
     NanReturnValue(args.This());
   } else {
@@ -36,4 +55,64 @@ NAN_METHOD(S2NConnection::New) {
     Local<Function> cons = NanNew<Function>(constructor);
     NanReturnValue(cons->NewInstance(argc, argv));
   }
+}
+
+NAN_METHOD(S2NConnection::SetConfig) {
+
+  NanScope();
+
+  if(args.Length() < 1 || !args[0]->IsObject()) {
+    NanThrowTypeError("Wrong arguments");
+    NanReturnUndefined();
+  }
+
+  // TODO: check args[0] is an instance of S2NConfig
+
+  S2NConnection* self = ObjectWrap::Unwrap<S2NConnection>(args.Holder());
+
+  S2NConfig* config = ObjectWrap::Unwrap<S2NConfig>(args[0]->ToObject());
+
+  int result = s2n_connection_set_config(self->s2nconnection, config->s2nconfig);
+
+  if(result < 0) {
+    std::string err(s2n_strerror(s2n_errno, "EN"));
+    std::string error("setting connection configuration: ");
+    error.append(err);
+    NanThrowError(error.c_str());
+    NanReturnUndefined();
+  }
+
+  self->config = config;
+
+  NanReturnValue(NanNew(true));
+
+}
+
+NAN_METHOD(S2NConnection::SetServerName) {
+
+  NanScope();
+
+  if(args.Length() < 1 || !args[0]->IsString()) {
+    NanThrowTypeError("Wrong arguments");
+    NanReturnUndefined();
+  }
+
+  S2NConnection* self = ObjectWrap::Unwrap<S2NConnection>(args.Holder());
+
+  std::string arg0 = *NanUtf8String(args[0]);
+
+  self->serverName = arg0.c_str();
+
+  int result = s2n_set_server_name(self->s2nconnection, self->serverName);
+
+  if(result < 0) {
+    std::string err(s2n_strerror(s2n_errno, "EN"));
+    std::string error("setting connection server name: ");
+    error.append(err);
+    NanThrowError(error.c_str());
+    NanReturnUndefined();
+  }
+
+  NanReturnValue(NanNew(true));
+
 }
