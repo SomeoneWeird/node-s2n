@@ -12,19 +12,19 @@ void InitAll(Handle<Object> exports) {
 
   int s2n_init_err = s2n_init();
 
-  if(s2n_init_err == -1) {
+  if(s2n_init_err < 0) {
     return NanThrowError("S2N failed to init");
   }
 
   S2NConfig::Init(exports);
   S2NConnection::Init(exports);
+
   exports->Set(NanNew("S2N_SSLv2"), NanNew(S2N_SSLv2));
   exports->Set(NanNew("S2N_SSLv3"), NanNew(S2N_SSLv3));
   exports->Set(NanNew("S2N_TLS10"), NanNew(S2N_TLS10));
   exports->Set(NanNew("S2N_TLS11"), NanNew(S2N_TLS11));
   exports->Set(NanNew("S2N_TLS12"), NanNew(S2N_TLS12));
 
-  /* enums */
   Local<Object> s2n_modes = NanNew<Object>();
   s2n_modes->Set(NanNew("S2N_SERVER"), NanNew(S2N_SERVER));
   s2n_modes->Set(NanNew("S2N_CLIENT"), NanNew(S2N_CLIENT));

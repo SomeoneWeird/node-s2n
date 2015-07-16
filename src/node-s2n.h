@@ -1,19 +1,14 @@
-#ifndef MODULENAME_HPP
-#define MODULENAME_HPP
+#ifndef S2N_H
+#define S2N_H
 
 #include <node.h>
 
-class S2NConfig : public node::ObjectWrap {
+class S2N : public node::ObjectWrap {
 public:
     static v8::Persistent<v8::FunctionTemplate> constructor;
     static void Init(v8::Handle<v8::Object> target);
 
 protected:
-    S2NConfig(int val);
+    static NAN_METHOD(New);
 
-    static v8::Handle<v8::Value> New(const v8::Arguments& args);
-    static v8::Handle<v8::Value> Value(const v8::Arguments& args);
-
-    // Your own object variables here
-    int value_;
 };
