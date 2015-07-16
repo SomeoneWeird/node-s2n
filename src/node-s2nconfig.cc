@@ -96,6 +96,7 @@ NAN_METHOD(S2NConfig::SetCipherPreferences) {
 
   if(result < 0) {
     NanThrowError("Error setting config cipher preferences");
+    NanReturnUndefined();
   }
 
   NanReturnValue(NanNew(true));
