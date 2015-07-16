@@ -116,12 +116,12 @@ NAN_METHOD(S2NConfig::AddCertChainAndKey) {
 
   NanScope();
 
-  if(args.Length() < 1) {
+  if(args.Length() < 2) {
     NanThrowTypeError("Wrong number of arguments");
     NanReturnUndefined();
   }
 
-  if(!args[0]->IsString()) {
+  if(!args[0]->IsString() || !args[1]->IsString()) {
     NanThrowTypeError("Wrong arguments");
     NanReturnUndefined();
   }
