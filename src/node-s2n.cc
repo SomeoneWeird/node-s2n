@@ -13,7 +13,11 @@ void InitAll(Handle<Object> exports) {
   int s2n_init_err = s2n_init();
 
   if(s2n_init_err < 0) {
-    return NanThrowError("S2N failed to init");
+    std::string err(s2n_strerror(s2n_errno, "EN"));
+    std::string error("S2N failed to init: ");
+    error.append(err);
+    NanThrowError(error.c_str());
+    NanReturnUndefined();
   }
 
   S2NConfig::Init(exports);

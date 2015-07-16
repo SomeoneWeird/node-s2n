@@ -72,7 +72,11 @@ NAN_METHOD(S2NConfig::SetStatusRequestType) {
   int result = s2n_config_set_status_request_type(self->s2nconfig, type);
 
   if(result < 0) {
-    NanThrowError("Error setting config status request type");
+    std::string err(s2n_strerror(s2n_errno, "EN"));
+    std::string error("setting config status request type: ");
+    error.append(err);
+    NanThrowError(error.c_str());
+    NanReturnUndefined();
   }
 
   NanReturnValue(NanNew(true));
@@ -97,7 +101,10 @@ NAN_METHOD(S2NConfig::SetCipherPreferences) {
   int result = s2n_config_set_cipher_preferences(self->s2nconfig, self->version);
 
   if(result < 0) {
-    NanThrowError("Error setting config cipher preferences");
+    std::string err(s2n_strerror(s2n_errno, "EN"));
+    std::string error("setting config cipher preferences: ");
+    error.append(err);
+    NanThrowError(error.c_str());
     NanReturnUndefined();
   }
 
@@ -130,7 +137,10 @@ NAN_METHOD(S2NConfig::AddCertChainAndKey) {
   int result = s2n_config_add_cert_chain_and_key(self->s2nconfig, self->certificate, self->privateKey);
 
   if(result < 0) {
-    NanThrowError("Error adding certificate chain and key");
+    std::string err(s2n_strerror(s2n_errno, "EN"));
+    std::string error("adding certificate chain and key: ");
+    error.append(err);
+    NanThrowError(error.c_str());
     NanReturnUndefined();
   }
 
@@ -165,6 +175,7 @@ NAN_METHOD(S2NConfig::AddDhParams) {
     std::string error("adding DH params: ");
     error.append(err);
     NanThrowError(error.c_str());
+    NanReturnUndefined();
   }
 
   NanReturnValue(NanNew(true));
