@@ -19,6 +19,7 @@ S2NConfig::~S2NConfig() {
   free(&version);
   free(&certificate);
   free(&privateKey);
+  free(&dhparams);
 }
 
 void S2NConfig::Init(Handle<Object> exports) {
@@ -32,6 +33,7 @@ void S2NConfig::Init(Handle<Object> exports) {
   NODE_SET_PROTOTYPE_METHOD(tpl, "setStatusRequestType", SetStatusRequestType);
   NODE_SET_PROTOTYPE_METHOD(tpl, "setCipherPreferences", SetCipherPreferences);
   NODE_SET_PROTOTYPE_METHOD(tpl, "addCertChainAndKey", AddCertChainAndKey);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "addDhParams", AddDhParams);
 
   NanAssignPersistent(constructor, tpl->GetFunction());
   exports->Set(NanNew("S2NConfig"), tpl->GetFunction());
@@ -130,6 +132,39 @@ NAN_METHOD(S2NConfig::AddCertChainAndKey) {
   if(result < 0) {
     NanThrowError("Error adding certificate chain and key");
     NanReturnUndefined();
+  }
+
+  NanReturnValue(NanNew(true));
+
+}
+
+NAN_METHOD(S2NConfig::AddDhParams) {
+
+  NanScope();
+
+  if(args.Length() < 1) {
+    NanThrowTypeError("Wrong number of arguments");
+    NanReturnUndefined();
+  }
+
+  if(!args[0]->IsString()) {
+    NanThrowTypeError("Wrong arguments");
+    NanReturnUndefined();
+  }
+
+  S2NConfig* self = ObjectWrap::Unwrap<S2NConfig>(args.Holder());
+
+  std::string arg0 = *NanUtf8String(args[0]);
+
+  self->dhparams = strdup(arg0.c_str());
+
+  int result = s2n_config_add_dhparams(self->s2nconfig, self->dhparams);
+
+  if(result < 0) {
+    std::string err(s2n_strerror(s2n_errno, "EN"));
+    std::string error("adding DH params: ");
+    error.append(err);
+    NanThrowError(error.c_str());
   }
 
   NanReturnValue(NanNew(true));

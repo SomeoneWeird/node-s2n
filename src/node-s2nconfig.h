@@ -17,6 +17,7 @@ class S2NConfig : public node::ObjectWrap {
   static NAN_METHOD(SetStatusRequestType);
   static NAN_METHOD(SetCipherPreferences);
   static NAN_METHOD(AddCertChainAndKey);
+  static NAN_METHOD(AddDhParams);
   static v8::Persistent<v8::Function> constructor;
 
   struct s2n_config *s2nconfig;
@@ -25,6 +26,7 @@ class S2NConfig : public node::ObjectWrap {
 
   char *certificate;
   char *privateKey;
+  char *dhparams;
 
 };
 
