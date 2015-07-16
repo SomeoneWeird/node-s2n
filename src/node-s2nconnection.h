@@ -17,6 +17,9 @@ class S2NConnection : public node::ObjectWrap {
   static NAN_METHOD(New);
   static NAN_METHOD(SetConfig);
   static NAN_METHOD(SetServerName);
+  static NAN_METHOD(SetFD);
+  static NAN_METHOD(SetReadFD);
+  static NAN_METHOD(SetWriteFD);
 
   static v8::Persistent<v8::Function> constructor;
 

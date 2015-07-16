@@ -28,6 +28,9 @@ void S2NConnection::Init(Handle<Object> exports) {
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "setConfig", SetConfig);
   NODE_SET_PROTOTYPE_METHOD(tpl, "setServerName", SetServerName);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "setFD", SetFD);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "setReadFD", SetReadFD);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "setWriteFD", SetWriteFD);
 
   NanAssignPersistent(constructor, tpl->GetFunction());
   exports->Set(NanNew("S2NConnection"), tpl->GetFunction());
@@ -116,3 +119,85 @@ NAN_METHOD(S2NConnection::SetServerName) {
   NanReturnValue(NanNew(true));
 
 }
+
+NAN_METHOD(S2NConnection::SetFD) {
+
+  NanScope();
+
+  if(args.Length() < 1 || !args[0]->IsNumber()) {
+    NanThrowTypeError("Wrong arguments");
+    NanReturnUndefined();
+  }
+
+  S2NConnection* self = ObjectWrap::Unwrap<S2NConnection>(args.Holder());
+
+  int fd = args[0]->IntegerValue();
+
+  int result = s2n_connection_set_fd(self->s2nconnection, fd);
+
+  if(result < 0) {
+    std::string err(s2n_strerror(s2n_errno, "EN"));
+    std::string error("setting connection fd: ");
+    error.append(err);
+    NanThrowError(error.c_str());
+    NanReturnUndefined();
+  }
+
+  NanReturnValue(NanNew(true));
+
+}
+
+NAN_METHOD(S2NConnection::SetReadFD) {
+
+  NanScope();
+
+  if(args.Length() < 1 || !args[0]->IsNumber()) {
+    NanThrowTypeError("Wrong arguments");
+    NanReturnUndefined();
+  }
+
+  S2NConnection* self = ObjectWrap::Unwrap<S2NConnection>(args.Holder());
+
+  int readFD = args[0]->IntegerValue();
+
+  int result = s2n_connection_set_read_fd(self->s2nconnection, readFD);
+
+  if(result < 0) {
+    std::string err(s2n_strerror(s2n_errno, "EN"));
+    std::string error("setting connection read fd: ");
+    error.append(err);
+    NanThrowError(error.c_str());
+    NanReturnUndefined();
+  }
+
+  NanReturnValue(NanNew(true));
+
+}
+
+NAN_METHOD(S2NConnection::SetWriteFD) {
+
+  NanScope();
+
+  if(args.Length() < 1 || !args[0]->IsNumber()) {
+    NanThrowTypeError("Wrong arguments");
+    NanReturnUndefined();
+  }
+
+  S2NConnection* self = ObjectWrap::Unwrap<S2NConnection>(args.Holder());
+
+  int writeFD = args[0]->IntegerValue();
+
+  int result = s2n_connection_set_write_fd(self->s2nconnection, writeFD);
+
+  if(result < 0) {
+    std::string err(s2n_strerror(s2n_errno, "EN"));
+    std::string error("setting connection write fd: ");
+    error.append(err);
+    NanThrowError(error.c_str());
+    NanReturnUndefined();
+  }
+
+  NanReturnValue(NanNew(true));
+
+}
+
