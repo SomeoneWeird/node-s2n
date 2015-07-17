@@ -28,6 +28,7 @@ void S2NConnection::Init(Handle<Object> exports) {
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "setConfig", SetConfig);
   NODE_SET_PROTOTYPE_METHOD(tpl, "setServerName", SetServerName);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "getServerName", GetServerName);
   NODE_SET_PROTOTYPE_METHOD(tpl, "setFD", SetFD);
   NODE_SET_PROTOTYPE_METHOD(tpl, "setReadFD", SetReadFD);
   NODE_SET_PROTOTYPE_METHOD(tpl, "setWriteFD", SetWriteFD);
@@ -117,6 +118,18 @@ NAN_METHOD(S2NConnection::SetServerName) {
   }
 
   NanReturnValue(NanNew(true));
+
+}
+
+NAN_METHOD(S2NConnection::GetServerName) {
+
+  NanScope();
+
+  S2NConnection* self = ObjectWrap::Unwrap<S2NConnection>(args.Holder());
+
+  const char* name = s2n_get_server_name(self->s2nconnection);
+
+  NanReturnValue(NanNew(name));
 
 }
 
