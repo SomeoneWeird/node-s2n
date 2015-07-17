@@ -36,6 +36,7 @@ void S2NConnection::Init(Handle<Object> exports) {
   NODE_SET_PROTOTYPE_METHOD(tpl, "setReadFD", SetReadFD);
   NODE_SET_PROTOTYPE_METHOD(tpl, "setWriteFD", SetWriteFD);
   NODE_SET_PROTOTYPE_METHOD(tpl, "setBlinding", SetBlinding);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "getApplicationProtocol", GetApplicationProtocol);
 
   NanAssignPersistent(constructor, tpl->GetFunction());
   exports->Set(NanNew("S2NConnection"), tpl->GetFunction());
@@ -242,5 +243,17 @@ NAN_METHOD(S2NConnection::SetBlinding) {
   }
 
   NanReturnValue(NanNew(true));
+
+}
+
+NAN_METHOD(S2NConnection::GetApplicationProtocol) {
+
+  NanScope();
+
+  S2NConnection* self = ObjectWrap::Unwrap<S2NConnection>(args.Holder());
+
+  const char* name = s2n_get_application_protocol(self->s2nconnection);
+
+  NanReturnValue(NanNew(name));
 
 }

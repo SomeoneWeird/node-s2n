@@ -22,6 +22,7 @@ class S2NConnection : public node::ObjectWrap {
   static NAN_METHOD(SetReadFD);
   static NAN_METHOD(SetWriteFD);
   static NAN_METHOD(SetBlinding);
+  static NAN_METHOD(GetApplicationProtocol);
 
   static v8::Persistent<v8::Function> constructor;
 
