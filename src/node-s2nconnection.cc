@@ -35,6 +35,7 @@ void S2NConnection::Init(Handle<Object> exports) {
   NODE_SET_PROTOTYPE_METHOD(tpl, "setFD", SetFD);
   NODE_SET_PROTOTYPE_METHOD(tpl, "setReadFD", SetReadFD);
   NODE_SET_PROTOTYPE_METHOD(tpl, "setWriteFD", SetWriteFD);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "setBlinding", SetBlinding);
 
   NanAssignPersistent(constructor, tpl->GetFunction());
   exports->Set(NanNew("S2NConnection"), tpl->GetFunction());
@@ -217,3 +218,29 @@ NAN_METHOD(S2NConnection::SetWriteFD) {
 
 }
 
+NAN_METHOD(S2NConnection::SetBlinding) {
+
+  NanScope();
+
+  if(args.Length() < 1 || !args[0]->IsNumber()) {
+    NanThrowTypeError("Wrong arguments");
+    NanReturnUndefined();
+  }
+
+  S2NConnection* self = ObjectWrap::Unwrap<S2NConnection>(args.Holder());
+
+  s2n_blinding blinding = static_cast<s2n_blinding>(args[0]->Int32Value());
+
+  int result = s2n_connection_set_blinding(self->s2nconnection, blinding);
+
+  if(result < 0) {
+    std::string err(s2n_strerror(s2n_errno, "EN"));
+    std::string error("setting connection blinding: ");
+    error.append(err);
+    NanThrowError(error.c_str());
+    NanReturnUndefined();
+  }
+
+  NanReturnValue(NanNew(true));
+
+}
