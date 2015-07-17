@@ -16,6 +16,9 @@ S2NConnection::S2NConnection(s2n_mode mode) {
 }
 
 S2NConnection::~S2NConnection() {
+  s2n_connection_free(s2nconnection);
+  free(&mode);
+  free(&serverName);
 }
 
 void S2NConnection::Init(Handle<Object> exports) {
