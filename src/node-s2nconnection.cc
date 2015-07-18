@@ -37,6 +37,7 @@ void S2NConnection::Init(Handle<Object> exports) {
   NODE_SET_PROTOTYPE_METHOD(tpl, "setWriteFD", SetWriteFD);
   NODE_SET_PROTOTYPE_METHOD(tpl, "setBlinding", SetBlinding);
   NODE_SET_PROTOTYPE_METHOD(tpl, "getApplicationProtocol", GetApplicationProtocol);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "getOCSPResponse", GetOCSPResponse);
   NODE_SET_PROTOTYPE_METHOD(tpl, "getAlert", GetAlert);
   NODE_SET_PROTOTYPE_METHOD(tpl, "getCipher", GetCipher);
   NODE_SET_PROTOTYPE_METHOD(tpl, "wipe", Wipe);
@@ -258,6 +259,20 @@ NAN_METHOD(S2NConnection::GetApplicationProtocol) {
   const char* name = s2n_get_application_protocol(self->s2nconnection);
 
   NanReturnValue(NanNew(name));
+
+}
+
+NAN_METHOD(S2NConnection::GetOCSPResponse) {
+
+  NanScope();
+
+  S2NConnection* self = ObjectWrap::Unwrap<S2NConnection>(args.Holder());
+
+  uint32_t length;
+
+  const uint8_t* response = s2n_connection_get_ocsp_response(self->s2nconnection, &length);
+
+  NanReturnValue(NanNew(response));
 
 }
 
