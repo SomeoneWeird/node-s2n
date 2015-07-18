@@ -25,6 +25,7 @@ class S2NConnection : public node::ObjectWrap {
   static NAN_METHOD(GetApplicationProtocol);
   static NAN_METHOD(GetAlert);
   static NAN_METHOD(GetCipher);
+  static NAN_METHOD(Wipe);
 
   static v8::Persistent<v8::Function> constructor;
 

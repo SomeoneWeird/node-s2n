@@ -39,6 +39,7 @@ void S2NConnection::Init(Handle<Object> exports) {
   NODE_SET_PROTOTYPE_METHOD(tpl, "getApplicationProtocol", GetApplicationProtocol);
   NODE_SET_PROTOTYPE_METHOD(tpl, "getAlert", GetAlert);
   NODE_SET_PROTOTYPE_METHOD(tpl, "getCipher", GetCipher);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "wipe", Wipe);
 
   NanAssignPersistent(constructor, tpl->GetFunction());
   exports->Set(NanNew("S2NConnection"), tpl->GetFunction());
@@ -281,5 +282,25 @@ NAN_METHOD(S2NConnection::GetCipher) {
   const char* cipher = s2n_connection_get_cipher(self->s2nconnection);
 
   NanReturnValue(NanNew(cipher));
+
+}
+
+NAN_METHOD(S2NConnection::Wipe) {
+
+  NanScope();
+
+  S2NConnection* self = ObjectWrap::Unwrap<S2NConnection>(args.Holder());
+
+  int result = s2n_connection_wipe(self->s2nconnection);
+
+  if(result < 0) {
+    std::string err(s2n_strerror(s2n_errno, "EN"));
+    std::string error("wiping connection: ");
+    error.append(err);
+    NanThrowError(error.c_str());
+    NanReturnUndefined();
+  }
+
+  NanReturnValue(NanNew(true));
 
 }
