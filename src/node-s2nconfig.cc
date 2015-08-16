@@ -5,12 +5,12 @@
 
 using namespace v8;
 
-Persistent<Function> S2NConfig::constructor;
+Nan::Persistent<Function> S2NConfig::constructor;
 
 S2NConfig::S2NConfig() {
   s2n_config *s2nconfig = s2n_config_new();
   if(!s2nconfig) {
-    NanThrowError("Error getting new S2N config");
+    Nan::ThrowError("Error getting new S2N config");
   }
 }
 
@@ -23,51 +23,51 @@ S2NConfig::~S2NConfig() {
 }
 
 void S2NConfig::Init(Handle<Object> exports) {
-  NanScope();
+  Nan::HandleScope scope;
 
   // Prepare constructor template
-  Local<FunctionTemplate> tpl = NanNew<FunctionTemplate>(New);
-  tpl->SetClassName(NanNew("S2NConfig"));
+  Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(New);
+  tpl->SetClassName(Nan::New("S2NConfig").ToLocalChecked());
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-  NODE_SET_PROTOTYPE_METHOD(tpl, "setStatusRequestType", SetStatusRequestType);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "setCipherPreferences", SetCipherPreferences);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "addCertChainAndKey", AddCertChainAndKey);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "addDhParams", AddDhParams);
+  Nan::SetPrototypeMethod(tpl, "setStatusRequestType", SetStatusRequestType);
+  Nan::SetPrototypeMethod(tpl, "setCipherPreferences", SetCipherPreferences);
+  Nan::SetPrototypeMethod(tpl, "addCertChainAndKey", AddCertChainAndKey);
+  Nan::SetPrototypeMethod(tpl, "addDhParams", AddDhParams);
 
-  NanAssignPersistent(constructor, tpl->GetFunction());
-  exports->Set(NanNew("S2NConfig"), tpl->GetFunction());
+  constructor.Reset(tpl->GetFunction());
+
+  Nan::Set(exports, Nan::New("S2NConfig").ToLocalChecked(), tpl->GetFunction());
 
 }
 
 NAN_METHOD(S2NConfig::New) {
-  NanScope();
+  Nan::HandleScope scope;
 
-  if (args.IsConstructCall()) {
+  if (info.IsConstructCall()) {
     S2NConfig* obj = new S2NConfig();
-    obj->Wrap(args.This());
-    NanReturnValue(args.This());
+    obj->Wrap(info.This());
+    info.GetReturnValue().Set(info.This());
   } else {
     const int argc = 1;
-    Local<Value> argv[argc] = { args[0] };
-    Local<Function> cons = NanNew<Function>(constructor);
-    NanReturnValue(cons->NewInstance(argc, argv));
+    Local<Value> argv[argc] = { info[0] };
+    Local<Function> cons = Nan::New<Function>(constructor);
+    info.GetReturnValue().Set(cons->NewInstance(argc, argv));
   }
 }
 
 NAN_METHOD(S2NConfig::SetStatusRequestType) {
+  Nan::HandleScope scope;
 
-  NanScope();
-
-  if(args.Length() < 1 || !args[0]->IsNumber()) {
-    NanThrowTypeError("Wrong arguments");
-    NanReturnUndefined();
+  if(info.Length() < 1 || !info[0]->IsNumber()) {
+    Nan::ThrowTypeError("Wrong arguments");
+    return;
   }
 
   // TODO: check type is valid
-  s2n_status_request_type type = static_cast<s2n_status_request_type>(args[0]->IntegerValue());
+  s2n_status_request_type type = static_cast<s2n_status_request_type>(info[0]->IntegerValue());
 
-  S2NConfig* self = ObjectWrap::Unwrap<S2NConfig>(args.Holder());
+  S2NConfig* self = ObjectWrap::Unwrap<S2NConfig>(info.Holder());
 
   int result = s2n_config_set_status_request_type(self->s2nconfig, type);
 
@@ -75,26 +75,25 @@ NAN_METHOD(S2NConfig::SetStatusRequestType) {
     std::string err(s2n_strerror(s2n_errno, "EN"));
     std::string error("setting config status request type: ");
     error.append(err);
-    NanThrowError(error.c_str());
-    NanReturnUndefined();
+    Nan::ThrowError(error.c_str());
+    return;
   }
 
-  NanReturnValue(NanNew(true));
+  info.GetReturnValue().Set(Nan::True());
 
 }
 
 NAN_METHOD(S2NConfig::SetCipherPreferences) {
+  Nan::HandleScope scope;
 
-  NanScope();
-
-  if(args.Length() < 1 || !args[0]->IsString()) {
-    NanThrowTypeError("Wrong arguments");
-    NanReturnUndefined();
+  if(info.Length() < 1 || !info[0]->IsString()) {
+    Nan::ThrowTypeError("Wrong arguments");
+    return;
   }
 
-  S2NConfig* self = ObjectWrap::Unwrap<S2NConfig>(args.Holder());
+  S2NConfig* self = ObjectWrap::Unwrap<S2NConfig>(info.Holder());
 
-  std::string arg0 = *NanUtf8String(args[0]);
+  std::string arg0 = *Nan::Utf8String(info[0]);
 
   self->version = arg0.c_str();
 
@@ -104,32 +103,31 @@ NAN_METHOD(S2NConfig::SetCipherPreferences) {
     std::string err(s2n_strerror(s2n_errno, "EN"));
     std::string error("setting config cipher preferences: ");
     error.append(err);
-    NanThrowError(error.c_str());
-    NanReturnUndefined();
+    Nan::ThrowError(error.c_str());
+    return;
   }
 
-  NanReturnValue(NanNew(true));
+  info.GetReturnValue().Set(Nan::True());
 
 }
 
 NAN_METHOD(S2NConfig::AddCertChainAndKey) {
+  Nan::HandleScope scope;
 
-  NanScope();
-
-  if(args.Length() < 2) {
-    NanThrowTypeError("Wrong number of arguments");
-    NanReturnUndefined();
+  if(info.Length() < 2) {
+    Nan::ThrowTypeError("Wrong number of arguments");
+    return;
   }
 
-  if(!args[0]->IsString() || !args[1]->IsString()) {
-    NanThrowTypeError("Wrong arguments");
-    NanReturnUndefined();
+  if(!info[0]->IsString() || !info[1]->IsString()) {
+    Nan::ThrowTypeError("Wrong arguments");
+    return;
   }
 
-  S2NConfig* self = ObjectWrap::Unwrap<S2NConfig>(args.Holder());
+  S2NConfig* self = ObjectWrap::Unwrap<S2NConfig>(info.Holder());
 
-  std::string arg0 = *NanUtf8String(args[0]);
-  std::string arg1 = *NanUtf8String(args[1]);
+  std::string arg0 = *Nan::Utf8String(info[0]);
+  std::string arg1 = *Nan::Utf8String(info[1]);
 
   self->certificate = strdup(arg0.c_str());
   self->privateKey  = strdup(arg1.c_str());
@@ -140,31 +138,30 @@ NAN_METHOD(S2NConfig::AddCertChainAndKey) {
     std::string err(s2n_strerror(s2n_errno, "EN"));
     std::string error("adding certificate chain and key: ");
     error.append(err);
-    NanThrowError(error.c_str());
-    NanReturnUndefined();
+    Nan::ThrowError(error.c_str());
+    return;
   }
 
-  NanReturnValue(NanNew(true));
+  info.GetReturnValue().Set(Nan::True());
 
 }
 
 NAN_METHOD(S2NConfig::AddDhParams) {
+  Nan::HandleScope scope;
 
-  NanScope();
-
-  if(args.Length() < 1) {
-    NanThrowTypeError("Wrong number of arguments");
-    NanReturnUndefined();
+  if(info.Length() < 1) {
+    Nan::ThrowTypeError("Wrong number of arguments");
+    return;
   }
 
-  if(!args[0]->IsString()) {
-    NanThrowTypeError("Wrong arguments");
-    NanReturnUndefined();
+  if(!info[0]->IsString()) {
+    Nan::ThrowTypeError("Wrong arguments");
+    return;
   }
 
-  S2NConfig* self = ObjectWrap::Unwrap<S2NConfig>(args.Holder());
+  S2NConfig* self = ObjectWrap::Unwrap<S2NConfig>(info.Holder());
 
-  std::string arg0 = *NanUtf8String(args[0]);
+  std::string arg0 = *Nan::Utf8String(info[0]);
 
   self->dhparams = strdup(arg0.c_str());
 
@@ -174,10 +171,10 @@ NAN_METHOD(S2NConfig::AddDhParams) {
     std::string err(s2n_strerror(s2n_errno, "EN"));
     std::string error("adding DH params: ");
     error.append(err);
-    NanThrowError(error.c_str());
-    NanReturnUndefined();
+    Nan::ThrowError(error.c_str());
+    return;
   }
 
-  NanReturnValue(NanNew(true));
+  info.GetReturnValue().Set(Nan::True());
 
 }

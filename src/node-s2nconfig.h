@@ -20,7 +20,7 @@ class S2NConfig : public node::ObjectWrap {
   static NAN_METHOD(SetCipherPreferences);
   static NAN_METHOD(AddCertChainAndKey);
   static NAN_METHOD(AddDhParams);
-  static v8::Persistent<v8::Function> constructor;
+  static Nan::Persistent<v8::Function> constructor;
 
   const char *version;
 
